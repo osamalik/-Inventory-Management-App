@@ -4,8 +4,8 @@ const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const cors = require("cors");
 
-const userRoute =require("./routes/userRoute") 
-
+const userRoute = require("./routes/userRoute") 
+const errorHandler = require("./middleWare/errorMiddleware") 
 
 const app = express()
 
@@ -20,11 +20,15 @@ app.use(bodyParser.json())
 //Route Middleware
 app.use("/api/users", userRoute)
 
+
 //Routes
 app.get("/", (req,res)=>{
     res.send("HOME PAGE");
 });
 
+
+//Error Middleware
+app.use(errorHandler);
 
 //Connect to DB to start server
 mongoose
