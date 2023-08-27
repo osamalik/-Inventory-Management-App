@@ -27,7 +27,7 @@ app.get("/", (req,res)=>{
 });
 
 
-//Error Middleware
+//Error Middleware for error handling
 app.use(errorHandler);
 
 //Connect to DB to start server

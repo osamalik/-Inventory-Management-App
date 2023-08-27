@@ -1,4 +1,5 @@
 const mongoose = require("mongoose")
+const bcrypt = require("bcryptjs");
 
 const userSchema = mongoose.Schema({
     name:{
@@ -40,7 +41,21 @@ const userSchema = mongoose.Schema({
 
 }, {
     timestamps: true,
-})
+});
+
+
+//Encrypting Password before creating a user
+userSchema.pre("save",async function(next){
+    if(!this.isModified("password")){
+        return next();
+    }
+    //Hashing the password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(this.password, salt);
+    this.password = hashedPassword
+    console.log(hashedPassword);
+    next(); 
+});
 
 
 const User = mongoose.model("User", userSchema)  // Evertime you access schema we use this variable "User"
