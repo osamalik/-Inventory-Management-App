@@ -3,7 +3,8 @@ const User = require("../models/userModel");
 const Token = require("..//models/tokenModel")
 const jwt = require("jsonwebtoken")
 const bcrypt = require("bcryptjs")
-const crypto = require("crypto")
+const crypto = require("crypto");
+const { Console } = require("console");
 
 const generateToken = (id) => {
     return jwt.sign({id}, process.env.JWT_SECRET, {expiresIn: "1d"})
@@ -237,6 +238,7 @@ const forgetPassword = asyncHandler(async (req, res)=>{
 
     // Generating Rest Token
     let resetToken = crypto.randomBytes(32).toString("hex") + user._id
+    console.log(resetToken);
 
     // Hashing the token before saving the token in Database
     const hashedToken = crypto.
@@ -277,6 +279,39 @@ const forgetPassword = asyncHandler(async (req, res)=>{
     res.send("Forget Password")
 });
 
+
+// Reset Password
+const resetpassword = asyncHandler(async (req,res) => {
+    
+    const {password} = req.body
+    const {resetToken} = req.params
+
+     // Hashing the token than compare what in the database
+    const hashedToken = crypto.
+    createHash("sha256").
+    update(resetToken).
+    digest("hex")
+
+    // Finding Token in the Database
+    const userToken = await Token.findOne({
+        token: hashedToken,
+        expiredAt: {$gt: Date.now()}
+    })
+
+    if(!userToken){
+        res.status(404);
+        throw new Error("Invalid or token is expires")
+    }
+
+    //Finding User in the Database
+    const user = await User.findById({_id: userToken.userId})
+    user.password = password
+    await user.save()
+    res.status(200)
+
+
+})
+
 module.exports = {
     registerUser,
     loginUser,
@@ -286,4 +321,5 @@ module.exports = {
     updateUser,
     changePassword,
     forgetPassword,
+    resetpassword,
 }
